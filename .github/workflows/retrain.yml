@@ -1,0 +1,32 @@
+name: Auto Retrain Iris Model
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+
+jobs:
+  retrain:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt mlflow
+
+      - name: Run training script
+        run: python train_model.py
+
+      - name: Commit updated model
+        run: |
+          git config --global user.email "you@example.com"
+          git config --global user.name "Your Name"
+          git add app/model.pkl
+          git commit -m "🔁 Weekly auto-retrain"
+          git push
