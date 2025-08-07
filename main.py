@@ -1,7 +1,12 @@
+import os
 from fastapi import FastAPI, Header, HTTPException
 from pydantic import BaseModel
 from app.predict import predict_species
 from train_model import train_model
+
+
+if not os.path.exists("app/model.pkl"):
+    train_model()
 
 app = FastAPI()
 
