@@ -1,28 +1,32 @@
 import pandas as pd
 from sklearn.datasets import load_iris
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
 import pickle
+import os
 import mlflow
 import mlflow.sklearn
 
 def train_model():
     iris = load_iris()
-    X = pd.DataFrame(iris.data, columns=iris.feature_names)
-    y = pd.Series(iris.target)
+    X = iris.data
+    y = iris.target
 
-    model = RandomForestClassifier()
+    model = LogisticRegression(max_iter=200)
     model.fit(X, y)
 
+    os.makedirs("app", exist_ok=True)
     with open("app/model.pkl", "wb") as f:
         pickle.dump(model, f)
 
-    mlflow.set_experiment("iris_model_experiment")
-    with mlflow.start_run():
-        mlflow.log_param("model_type", "RandomForestClassifier")
-        mlflow.sklearn.log_model(model, "model")
-        mlflow.log_metric("accuracy", model.score(X, y))
+    mlflow.set_tracking_uri("file:./mlruns")
+    mlflow.set_experiment("iris_classifier")
 
-    print(" Model trained and logged with MLflow.")
+    with mlflow.start_run():
+        mlflow.log_param("model_type", "logistic_regression")
+        mlflow.log_metric("accuracy", model.score(X, y))
+        mlflow.sklearn.log_model(model, "model")
+
+    print("Model trained and logged with MLflow")
 
 if __name__ == "__main__":
     train_model()
